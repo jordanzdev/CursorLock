@@ -4,8 +4,9 @@
   Español on the first page swaps them before the next page is created, so the rest of the
   installer follows the chosen language.
 
-  Flow: Language -> Progress -> Done, plus the pages Windows Installer needs for cancellation,
-  errors and applications in use. Sizes are in dialog units (370 x 270, like WixUI).
+  Flow: Install (language and options) -> Progress -> Done, plus the pages Windows Installer
+  needs for cancellation, errors and applications in use. Sizes are in dialog units
+  (370 x 270, like WixUI).
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Fragment>
@@ -26,6 +27,13 @@
     <SetProperty Id="CURSORLOCK_LANGUAGE" Value="es" Sequence="ui" After="SetUserLanguageKey"
                  Condition="CURSORLOCK_APPLANGUAGE = &quot;#1&quot; OR (CURSORLOCK_APPLANGUAGE &lt;&gt; &quot;#2&quot; AND &quot;|1034|3082|2058|4106|5130|6154|7178|8202|9226|10250|11274|12298|13322|14346|15370|16394|17418|18442|19466|20490|21514|22538|&quot; &gt;&lt; UserLanguageKey)" />
 
+    <!-- Last page: "Create a desktop shortcut" starts unchecked and is hidden if one already exists. -->
+    <Property Id="DESKTOPLINKEXISTS">
+      <DirectorySearch Id="DesktopSearch" Path="[DesktopFolder]" Depth="0">
+        <FileSearch Id="DesktopLinkSearch" Name="CursorLock.lnk" />
+      </DirectorySearch>
+    </Property>
+
     <Property Id="OPENAPP" Value="1" />
     <Property Id="RMOPTION" Value="UseRM" />
     <Property Id="ErrorDialog" Value="ErrorDlg" />
@@ -38,17 +46,17 @@
       <TextStyle Id="TitleFont" FaceName="Segoe UI" Size="13" />
 
       <!--
-        1. Language. The page switches language as soon as a radio button is picked: each text
-        and button exists once per language in the same place, and Windows Installer re-evaluates
-        the Show/Hide/Default conditions whenever CURSORLOCK_LANGUAGE changes.
+        1. Install: language and options. The page switches language as soon as a radio button
+        is picked: each text and button exists once per language in the same place, and Windows
+        Installer re-evaluates the Show/Hide/Default conditions whenever CURSORLOCK_LANGUAGE changes.
       -->
       <Dialog Id="LanguageDlg" Width="370" Height="270" Title="CursorLock">
         <Control Id="Side" Type="Bitmap" X="0" Y="0" Width="123" Height="234" Text="SideBitmap" TabSkip="no" />
 
         <Control Id="TitleEn" Type="Text" X="138" Y="20" Width="220" Height="22" NoPrefix="yes"
-                 Text="{\TitleFont}Language" ShowCondition="CURSORLOCK_LANGUAGE = &quot;en&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;en&quot;" />
+                 Text="{\TitleFont}Install CursorLock" ShowCondition="CURSORLOCK_LANGUAGE = &quot;en&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;en&quot;" />
         <Control Id="TitleEs" Type="Text" X="138" Y="20" Width="220" Height="22" NoPrefix="yes"
-                 Text="{\TitleFont}Idioma" ShowCondition="CURSORLOCK_LANGUAGE = &quot;es&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;es&quot;" />
+                 Text="{\TitleFont}Instalar CursorLock" ShowCondition="CURSORLOCK_LANGUAGE = &quot;es&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;es&quot;" />
         <Control Id="PromptEn" Type="Text" X="138" Y="50" Width="220" Height="44" NoPrefix="yes"
                  Text="Choose the language of the installer and of CursorLock. You can change it later in CursorLock's settings."
                  ShowCondition="CURSORLOCK_LANGUAGE = &quot;en&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;en&quot;" />
@@ -64,13 +72,13 @@
         </Control>
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
-        <Control Id="ContinueEn" Type="PushButton" X="210" Y="243" Width="72" Height="17" Default="yes" Text="Continue"
+        <Control Id="InstallEn" Type="PushButton" X="210" Y="243" Width="72" Height="17" Default="yes" Text="Install"
                  ShowCondition="CURSORLOCK_LANGUAGE = &quot;en&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;en&quot;" DefaultCondition="CURSORLOCK_LANGUAGE = &quot;en&quot;">
           <Publish Property="CURSORLOCK_SETLANGUAGE" Value="1" Order="1" />
           <Publish Property="CURSORLOCK_LANGUAGEID" Value="2" Order="1" />
           <Publish Event="EndDialog" Value="Return" Order="100" />
         </Control>
-        <Control Id="ContinueEs" Type="PushButton" X="210" Y="243" Width="72" Height="17" Text="Continuar"
+        <Control Id="InstallEs" Type="PushButton" X="210" Y="243" Width="72" Height="17" Text="Instalar"
                  ShowCondition="CURSORLOCK_LANGUAGE = &quot;es&quot;" HideCondition="CURSORLOCK_LANGUAGE &lt;&gt; &quot;es&quot;" DefaultCondition="CURSORLOCK_LANGUAGE = &quot;es&quot;">
           <!-- Texts.wxs also sets the Spanish texts here, before EndDialog. -->
           <Publish Property="CURSORLOCK_SETLANGUAGE" Value="1" Order="1" />
@@ -106,19 +114,23 @@
         </Control>
       </Dialog>
 
-      <!-- 3. Done, with the "Open CursorLock" check box -->
+      <!-- 3. Done, with "Create a desktop shortcut" (unchecked) and "Open CursorLock" (checked) -->
       <Dialog Id="ExitDlg" Width="370" Height="270" Title="CursorLock">
         <Control Id="Side" Type="Bitmap" X="0" Y="0" Width="123" Height="234" Text="SideBitmap" TabSkip="no" />
         <Control Id="Title" Type="Text" X="138" Y="20" Width="220" Height="40" NoPrefix="yes"
                  Text="{\TitleFont}[TxtExitTitle]" />
         <Control Id="Description" Type="Text" X="138" Y="66" Width="220" Height="60" NoPrefix="yes"
                  Text="[TxtExitText]" />
+        <Control Id="DesktopShortcut" Type="CheckBox" X="138" Y="178" Width="220" Height="17" Property="DESKTOPSHORTCUT"
+                 CheckBoxValue="1" Text="[TxtDesktopShortcut]" HideCondition="Installed OR DESKTOPLINKEXISTS" />
         <Control Id="OpenApp" Type="CheckBox" X="138" Y="200" Width="220" Height="17" Property="OPENAPP"
                  CheckBoxValue="1" Text="[TxtOpenApp]" HideCondition="Installed" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Finish" Type="PushButton" X="288" Y="243" Width="72" Height="17" Default="yes" Cancel="yes"
                  Text="[TxtFinish]">
-          <Publish Event="DoAction" Value="LaunchApp" Condition="OPENAPP = 1 AND NOT Installed" />
+          <Publish Event="DoAction" Value="CreateDesktopShortcut" Order="1"
+                   Condition="DESKTOPSHORTCUT = 1 AND NOT Installed AND NOT DESKTOPLINKEXISTS" />
+          <Publish Event="DoAction" Value="LaunchApp" Order="2" Condition="OPENAPP = 1 AND NOT Installed" />
           <Publish Event="EndDialog" Value="Return" Order="100" />
         </Control>
       </Dialog>

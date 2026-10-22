@@ -58,8 +58,12 @@ internal static unsafe class App
     public static int RemoveUserData()
     {
         StartupRegistration.UnregisterCurrentExecutable();
+        DesktopShortcut.RemoveIfTargetsCurrentExecutable();
         return ConfigStore.Delete() ? 0 : 1;
     }
+
+    /// <summary>Run by the installer's last page when "Create a desktop shortcut" is checked.</summary>
+    public static int CreateDesktopShortcut() => DesktopShortcut.Create() ? 0 : 1;
 
     public static void OnTrayEvent(TrayEvent trayEvent, POINT anchor)
     {

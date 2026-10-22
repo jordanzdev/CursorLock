@@ -6,13 +6,17 @@ namespace CursorLock;
 internal static class Program
 {
     const string InstanceMutexName = @"Local\CursorLock";
-    const string RemoveUserDataArgument = "--uninstall"; // passed by the MSI uninstaller
+    // Passed by the MSI; each one does its job and exits without starting the app.
+    const string RemoveUserDataArgument = "--uninstall";
+    const string CreateDesktopShortcutArgument = "--create-desktop-shortcut";
 
     [STAThread]
     static int Main(string[] args)
     {
         if (args is [RemoveUserDataArgument])
             return App.RemoveUserData();
+        if (args is [CreateDesktopShortcutArgument])
+            return App.CreateDesktopShortcut();
 
         using SingleInstance instance = SingleInstance.TryAcquire(InstanceMutexName);
         if (!instance.IsAcquired)

@@ -22,7 +22,7 @@ Download the latest version from **[Releases](../../releases)**:
 
 | File | Purpose |
 |---|---|
-| `CursorLock-x.y.z.msi` | **Per-user** Windows Installer package: no administrator rights needed. Its first page lets you choose English or Español (for the installer and for CursorLock); it installs to `%LOCALAPPDATA%\Programs\CursorLock`, adds a Start menu shortcut and its last page offers to open CursorLock. Uninstall it from *Settings → Apps*. |
+| `CursorLock-x.y.z.msi` | **Per-user** Windows Installer package: no administrator rights needed. Its first page lets you choose English or Español (for the installer and for CursorLock); it installs to `%LOCALAPPDATA%\Programs\CursorLock`, adds a Start menu shortcut, and its last page offers to create a desktop shortcut and to open CursorLock. Uninstall it from *Settings → Apps*. |
 | `CursorLock-x.y.z-portable.exe` | The same executable without installing: copy it anywhere and run it. |
 | `SHA256SUMS.txt` | Hashes to verify the downloads: `Get-FileHash <file>` in PowerShell, or `sha256sum -c SHA256SUMS.txt`. |
 
@@ -223,7 +223,9 @@ Missing or invalid values fall back to their defaults.
 
 Removing the portable version by hand: untick *Start with Windows*, exit, delete the exe
 and, optionally, the `HKCU\Software\CursorLock` key. `CursorLock.exe --uninstall` does the
-registry part (it is what the MSI runs on uninstall).
+registry part and removes the desktop shortcut if it points to that exe (it is what the MSI
+runs on uninstall); `CursorLock.exe --create-desktop-shortcut` creates the shortcut (what
+the installer's last page runs).
 
 ## Robustness
 
@@ -256,7 +258,8 @@ CursorLock/
     Monitors.cs              monitors and target rectangle per mode
     Config.cs, Hotkey.cs, VirtualKeys.cs, UiLanguage.cs, AppVersion.cs
   Persistence/               HKCU registry
-    ConfigStore.cs, StartupRegistration.cs, InstallRegistration.cs, RegistryKeyHandle.cs
+    ConfigStore.cs, StartupRegistration.cs, InstallRegistration.cs, RegistryKeyHandle.cs,
+    DesktopShortcut.cs       optional desktop shortcut (IShellLink)
   Updates/                   "Check for updates" (the only network code, run on click)
     HttpsRequest.cs          synchronous HTTPS GET with WinHTTP
     GitHubReleases.cs        latest version from the releases/latest redirect; asset downloads

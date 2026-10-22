@@ -64,6 +64,12 @@
     <!-- Starts the app without arguments, so it opens its Settings window. -->
     <CustomAction Id="LaunchApp" FileRef="CursorLockExe" ExeCommand="" Return="asyncNoWait" />
 
+    <!--
+      Last page, "Create a desktop shortcut": the app creates it after the installation and exits.
+      Not part of the MSI's components; the RemoveUserData clean-up removes it on uninstall.
+    -->
+    <CustomAction Id="CreateDesktopShortcut" FileRef="CursorLockExe" ExeCommand="--create-desktop-shortcut" Return="ignore" />
+
     <InstallExecuteSequence>
       <Custom Action="RemoveUserData" Before="RemoveFiles"
               Condition="REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />

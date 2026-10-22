@@ -7,6 +7,16 @@ GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- The last page of the installer offers to **create a desktop shortcut** (unchecked by
+  default, and not offered if you already have one). Uninstalling removes it.
+
+### Changed
+
+- The first page of the installer is titled *Install CursorLock* and its button is
+  **Install**, since it starts the installation right away.
+
 ## [1.0.1] - 2026-10-22
 
 ### Added
