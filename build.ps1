@@ -32,10 +32,18 @@ Invoke-Checked { dotnet publish (Join-Path $root 'CursorLock\CursorLock.csproj')
 $exe = Join-Path $publish 'CursorLock.exe'
 $installerProject = Join-Path $root 'installer\CursorLock.Installer.wixproj'
 
-Write-Host 'Building the MSI installer...'
+Write-Host 'Building the MSI installers (one per culture)...'
+$msiOutput = Join-Path $artifacts 'msi'
 Invoke-Checked {
-    dotnet build $installerProject -c Release "-p:ProductVersion=$Version" "-p:SourceExe=$exe" -o $artifacts
+    dotnet build $installerProject -c Release "-p:ProductVersion=$Version" "-p:SourceExe=$exe" -o $msiOutput
 }
+
+# msi\<culture>\CursorLock-<version>.msi → CursorLock-<version>-<culture>.msi
+Get-ChildItem $msiOutput -Recurse -Filter '*.msi' | ForEach-Object {
+    $culture = $_.Directory.Name
+    Move-Item $_.FullName (Join-Path $artifacts "CursorLock-$Version-$culture.msi") -Force
+}
+Remove-Item $msiOutput -Recurse -Force
 
 Copy-Item $exe (Join-Path $artifacts "CursorLock-$Version-portable.exe") -Force
 

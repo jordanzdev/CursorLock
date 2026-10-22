@@ -1,10 +1,11 @@
 <#
 .SYNOPSIS
-    Generates the CursorLock logo: assets\CursorLock.ico (16–256 px) and assets\logo.svg.
+    Generates the CursorLock branding in assets\: CursorLock.ico (16–256 px), logo.svg and the
+    installer bitmaps (installer-banner.bmp, installer-dialog.bmp).
 
 .DESCRIPTION
     The logo is a white mouse cursor inside red corner brackets (a confined cursor) on a dark
-    rounded square. Both outputs come from the same geometry, defined below on a 256-unit grid.
+    rounded square. All outputs come from the same geometry, defined below on a 256-unit grid.
     Sizes up to 24 px use a bolder variant so the shape stays readable in the taskbar.
     Requires Windows PowerShell 5.1 (System.Drawing).
 #>
@@ -65,7 +66,7 @@ function ConvertTo-PointArray($points) {
     [Drawing.PointF[]] ($points | ForEach-Object { New-Object Drawing.PointF ([float] $_[0]), ([float] $_[1]) })
 }
 
-function New-LogoPng([int] $size) {
+function New-LogoBitmap([int] $size) {
     $v = if ($size -le $smallSizeLimit) { $variants.Bold } else { $variants.Regular }
     $bitmap = New-Object Drawing.Bitmap $size, $size, ([Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $g = [Drawing.Graphics]::FromImage($bitmap)
@@ -89,6 +90,11 @@ function New-LogoPng([int] $size) {
     $g.FillPolygon((New-Object Drawing.SolidBrush ([Drawing.ColorTranslator]::FromHtml($colors.Cursor))), $cursor)
 
     $g.Dispose()
+    $bitmap
+}
+
+function New-LogoPng([int] $size) {
+    $bitmap = New-LogoBitmap $size
     $stream = New-Object IO.MemoryStream
     $bitmap.Save($stream, [Drawing.Imaging.ImageFormat]::Png)
     $bitmap.Dispose()
@@ -144,6 +150,54 @@ $brackets
     [IO.File]::WriteAllText($path, $svg + "`n", (New-Object Text.UTF8Encoding $false))
 }
 
+# Installer (WixUI) bitmaps: 24-bit BMP at the sizes WiX expects.
+function New-InstallerCanvas([int] $width, [int] $height) {
+    $bitmap = New-Object Drawing.Bitmap $width, $height, ([Drawing.Imaging.PixelFormat]::Format24bppRgb)
+    $g = [Drawing.Graphics]::FromImage($bitmap)
+    $g.SmoothingMode = 'AntiAlias'
+    $g.InterpolationMode = 'HighQualityBicubic'
+    $g.TextRenderingHint = 'AntiAliasGridFit'
+    $g.Clear([Drawing.Color]::White)
+    $bitmap, $g
+}
+
+function Save-Bmp($bitmap, $g, [string] $path) {
+    $g.Dispose()
+    $bitmap.Save($path, [Drawing.Imaging.ImageFormat]::Bmp)
+    $bitmap.Dispose()
+}
+
+# Top banner of the progress and files-in-use pages: white, logo on the right.
+function Write-InstallerBanner([string] $path) {
+    $bitmap, $g = New-InstallerCanvas 493 58
+    $logo = New-LogoBitmap 46
+    $g.DrawImage($logo, 493 - 46 - 8, 6, 46, 46)
+    $logo.Dispose()
+    Save-Bmp $bitmap $g $path
+}
+
+# Side panel of the final page: dark strip with the logo and the name; the text area stays white.
+function Write-InstallerDialog([string] $path) {
+    $panelWidth = 164
+    $bitmap, $g = New-InstallerCanvas 493 312
+    $panel = New-Object Drawing.Drawing2D.LinearGradientBrush (New-Object Drawing.PointF 0, 0), (New-Object Drawing.PointF 0, 312),
+        ([Drawing.ColorTranslator]::FromHtml($colors.BackgroundTop)), ([Drawing.ColorTranslator]::FromHtml($colors.BackgroundBottom))
+    $g.FillRectangle($panel, 0, 0, $panelWidth, 312)
+
+    $logoSize = 104
+    $logo = New-LogoBitmap $logoSize
+    $g.DrawImage($logo, ($panelWidth - $logoSize) / 2, 56, $logoSize, $logoSize)
+    $logo.Dispose()
+
+    $font = New-Object Drawing.Font 'Segoe UI Semibold', 13, ([Drawing.FontStyle]::Regular), ([Drawing.GraphicsUnit]::Point)
+    $format = New-Object Drawing.StringFormat
+    $format.Alignment = 'Center'
+    $g.DrawString('CursorLock', $font, [Drawing.Brushes]::White, (New-Object Drawing.RectangleF 0, 176, $panelWidth, 40), $format)
+    Save-Bmp $bitmap $g $path
+}
+
 Write-Ico (Join-Path $assets 'CursorLock.ico') $sizes
 Write-Svg (Join-Path $assets 'logo.svg')
-Write-Host "Written: $(Join-Path $assets 'CursorLock.ico') ($($sizes -join ', ') px), $(Join-Path $assets 'logo.svg')"
+Write-InstallerBanner (Join-Path $assets 'installer-banner.bmp')
+Write-InstallerDialog (Join-Path $assets 'installer-dialog.bmp')
+Write-Host "Written to ${assets}: CursorLock.ico ($($sizes -join ', ') px), logo.svg, installer-banner.bmp, installer-dialog.bmp"

@@ -22,7 +22,7 @@ Download the latest version from **[Releases](../../releases)**:
 
 | File | Purpose |
 |---|---|
-| `CursorLock-x.y.z.msi` | **Per-user** Windows Installer package: no administrator rights needed. Installs to `%LOCALAPPDATA%\Programs\CursorLock`, adds a Start menu shortcut and starts the app when done. Uninstall it from *Settings → Apps*. |
+| `CursorLock-x.y.z-en-US.msi`<br>`CursorLock-x.y.z-es-ES.msi` | **Per-user** Windows Installer package, in English or Spanish: no administrator rights needed. Installs to `%LOCALAPPDATA%\Programs\CursorLock` and adds a Start menu shortcut; the last page offers to open CursorLock. Uninstall it from *Settings → Apps*. |
 | `CursorLock-x.y.z-portable.exe` | The same executable without installing: copy it anywhere and run it. |
 | `SHA256SUMS.txt` | Hashes to verify the downloads: `Get-FileHash <file>` in PowerShell, or `sha256sum -c SHA256SUMS.txt`. |
 
@@ -47,10 +47,10 @@ Indicators: **grey icon = free**, **red icon = locked**; the tooltip shows the s
 the hotkey; optional sound (on by default); optional on-screen notice, OSD (off by
 default).
 
-The app always starts **unlocked**. On the **first run** (no saved settings yet, e.g. right
-after installing) it opens the Settings window; after that it starts silently in the tray.
-If the saved hotkey is taken by another application, it shows a balloon warning and keeps
-working from the tray menu.
+The app always starts **unlocked**. When you open it (Start menu, the exe, or the end of the
+installation) it shows the Settings window; when Windows starts it at sign-in
+(*Start with Windows*) it stays silently in the tray. If the saved hotkey is taken by
+another application, it shows a balloon warning and keeps working from the tray menu.
 
 ### Settings
 
@@ -69,7 +69,15 @@ working from the tray menu.
   otherwise), *Español* or *English*.
 - **Start with Windows**, **Sound**, **Show on-screen notice (OSD)**.
 
-Changes apply on save, without restarting.
+Changes apply on save, without restarting. The window title shows the installed version.
+
+### Updates
+
+**Check for updates** (in Settings) looks up the latest release on GitHub. If there is a
+newer one, it asks first, then downloads the MSI in your language, verifies it against the
+release's `SHA256SUMS.txt` and starts it; the installer replaces the app, keeps your settings
+and offers to open CursorLock at the end. With the portable exe it opens the download page
+instead. The app never checks for updates on its own.
 
 ## Why it adds no latency
 
@@ -118,7 +126,11 @@ Also:
 
 - It does not know or care which program is in the foreground: it behaves the same in
   any window.
-- No network access, no telemetry, it does not start other processes.
+- **No network access and no telemetry**, with one explicit exception: when you click
+  **Check for updates**, it connects to `github.com` only (nothing about you or your PC is
+  sent) and, if you accept an update, starts the downloaded installer or opens the download
+  page. Nothing happens automatically or in the background; it never starts other processes
+  otherwise.
 - No administrator rights (`asInvoker` manifest).
 - No packers, obfuscators or compressors (no UPX).
 
@@ -165,7 +177,8 @@ downloaded automatically at build time, nothing else to install.
 Output in `artifacts\`:
 
 ```
-CursorLock-1.2.3.msi
+CursorLock-1.2.3-en-US.msi
+CursorLock-1.2.3-es-ES.msi
 CursorLock-1.2.3-portable.exe
 SHA256SUMS.txt
 ```
@@ -190,7 +203,7 @@ git push origin v1.2.3
 ```
 
 The [`release.yml`](.github/workflows/release.yml) workflow builds the exe and the MSI on
-`windows-latest` and creates the GitHub Release with the three files.
+`windows-latest` and creates the GitHub Release with these files.
 
 ## Registry
 
@@ -198,7 +211,7 @@ The [`release.yml`](.github/workflows/release.yml) workflow builds the exe and t
 |---|---|
 | `HKCU\Software\CursorLock` | `HotkeyModifiers` (DWORD, `MOD_*`), `HotkeyVk` (DWORD), `TargetMode` (DWORD: 0 under the cursor, 1 primary, 2 specific), `TargetDevice` (REG_SZ, e.g. `\\.\DISPLAY2`), `ReapplyMs` (DWORD), `Sound` (DWORD 0/1), `Osd` (DWORD 0/1), `Language` (DWORD: 0 automatic, 1 Spanish, 2 English) |
 | `HKCU\Software\CursorLock\Install` | Used by the MSI to track what it installed |
-| `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` | `CursorLock` = quoted path of the exe (only when *Start with Windows* is enabled) |
+| `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` | `CursorLock` = `"<path of the exe>" --startup` (only when *Start with Windows* is enabled; `--startup` keeps it in the tray) |
 
 Missing or invalid values fall back to their defaults.
 
@@ -220,8 +233,8 @@ registry part (it is what the MSI runs on uninstall).
 build.ps1                    exe + MSI + hashes into artifacts\
 .github/workflows/           automatic release when a v* tag is pushed
 installer/                   per-user MSI (WiX 5)
-assets/                      logo: CursorLock.ico (embedded in the exe and the MSI) and logo.svg
-tools/New-AppIcon.ps1        regenerates both logo files from the same geometry
+assets/                      logo (CursorLock.ico, logo.svg) and installer bitmaps
+tools/New-Branding.ps1       regenerates every file in assets/ from the same geometry
 CursorLock/
   CursorLock.csproj          NativeAOT, no NuGet packages
   app.manifest               Common Controls v6, PerMonitorV2, asInvoker
@@ -232,15 +245,19 @@ CursorLock/
     CursorLocker.cs          lock state, ClipCursor, timer; reports changes through an event
     GlobalHotkey.cs          RegisterHotKey, suspended while Settings is active
     Monitors.cs              monitors and target rectangle per mode
-    Config.cs, Hotkey.cs, VirtualKeys.cs, UiLanguage.cs
+    Config.cs, Hotkey.cs, VirtualKeys.cs, UiLanguage.cs, AppVersion.cs
   Persistence/               HKCU registry
-    ConfigStore.cs, StartupRegistration.cs, RegistryKeyHandle.cs
+    ConfigStore.cs, StartupRegistration.cs, InstallRegistration.cs, RegistryKeyHandle.cs
+  Updates/                   "Check for updates" (the only network code, run on click)
+    HttpsRequest.cs          synchronous HTTPS GET with WinHTTP
+    GitHubReleases.cs        latest version from the releases/latest redirect; asset downloads
+    UpdateDownloader.cs      MSI download verified against SHA256SUMS.txt
   Ui/                        Win32
     MainWindow.cs            hidden window: routes messages
     TrayIcon.cs, TrayMenu.cs, StatusIcons.cs, LockFeedback.cs, OsdWindow.cs
     Strings.cs               English and Spanish UI text
     HotkeyText.cs, HotkeyControl.cs, WindowClass.cs, WindowIcons.cs, AppInstance.cs, Dpi.cs, SystemFont.cs
-    Settings/                SettingsWindow, SettingsControls, SettingsForm, CloseConfirmation
+    Settings/                SettingsWindow, SettingsControls, SettingsForm, CloseConfirmation, UpdateCheck
   Native/                    P/Invoke with [LibraryImport], no logic
 ```
 

@@ -1,4 +1,5 @@
 using CursorLock.Core;
+using CursorLock.Persistence;
 
 namespace CursorLock;
 
@@ -21,7 +22,8 @@ internal static class Program
         AppDomain.CurrentDomain.UnhandledException += static (_, _) => CursorLocker.ReleaseClip();
         try
         {
-            return App.Run();
+            bool startedWithWindows = args is [StartupRegistration.StartupArgument];
+            return App.Run(showSettings: !startedWithWindows);
         }
         finally
         {

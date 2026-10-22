@@ -27,13 +27,20 @@ These are the reasons the app exists; pull requests that break them cannot be ac
 - **Anti-cheat safety.** Never use the APIs listed in
   [What it does NOT do](README.md#what-it-does-not-do): no hooks, no keyboard polling, no
   Raw Input, no input injection, no access to other processes, no overlays. The cursor is
-  confined with `ClipCursor` only. No network access, no telemetry, no administrator rights.
+  confined with `ClipCursor` only. No telemetry and no administrator rights.
+- **Network only on request.** The only network code is the *Check for updates* button
+  (`Updates/`): it talks to `github.com` only, runs only when the user clicks it, sends no
+  user data, and only starts the downloaded installer (after its SHA-256 check) or the
+  download page. Do not add automatic checks, background requests or other endpoints.
 - **Zero added latency.** No code may run per mouse or keyboard event.
 - **Minimal resources.** One UI thread, no `Task`/`async`/thread pool. Nothing runs while
   the cursor is free (the thread sleeps in `GetMessageW`). No allocations in the message
   loop, the lock/unlock path or the timer tick.
 - **NativeAOT clean.** No reflection, no new NuGet packages in the app, and the build must
   produce no warnings, including trimming/AOT ones (IL2xxx/IL3xxx).
+- **Release assets keep their names.** The updater downloads
+  `CursorLock-<version>-<culture>.msi` and `SHA256SUMS.txt` from the release tagged
+  `v<version>`; `build.ps1` and the release workflow produce exactly those.
 - **Always release the cursor.** Every exit path must end with `ClipCursor(NULL)`.
 
 ## Code style

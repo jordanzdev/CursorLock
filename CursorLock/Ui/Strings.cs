@@ -42,7 +42,8 @@ internal static class Strings
     public static string OsdFree => Pick("Libre", "Free");
 
     // Settings window
-    public static string SettingsTitle => Pick("CursorLock — Configuración", "CursorLock — Settings");
+    public static string SettingsTitle =>
+        $"CursorLock {AppVersion.CurrentText} — " + Pick("Configuración", "Settings");
     public static string LabelHotkey => Pick("Atajo de teclado:", "Keyboard shortcut:");
     public static string LabelMonitor => Pick("Monitor objetivo:", "Target monitor:");
     public static string LabelReapplyInterval => Pick("Reaplicar cada (ms):", "Reapply every (ms):");
@@ -78,6 +79,41 @@ internal static class Strings
     public static string ErrorNotPersisted => Pick(
         "La configuración se ha aplicado, pero no se pudo guardar en el registro.",
         "The settings were applied, but could not be saved to the registry.");
+
+    // Updates
+    /// <summary>Culture of the MSI to download, matching the UI language.</summary>
+    public static string InstallerCulture => s_isEnglish ? "en-US" : "es-ES";
+    public static string ButtonCheckForUpdates => Pick("Buscar actualizaciones", "Check for updates");
+    public static string CheckingForUpdates => Pick("Comprobando…", "Checking…");
+    public static string DownloadingUpdate => Pick("Descargando…", "Downloading…");
+
+    public static string UpdateCheckFailed => Pick(
+        "No se pudo comprobar si hay actualizaciones. Revisa tu conexión a Internet.",
+        "Could not check for updates. Check your internet connection.");
+
+    public static string UpToDate(string current) => s_isEnglish
+        ? $"You have the latest version of CursorLock ({current})."
+        : $"Tienes la última versión de CursorLock ({current}).";
+
+    public static string UpdateAvailable(string available, string current) => s_isEnglish
+        ? $"A new version of CursorLock is available: {available} (you have {current}).\n\nDownload and install it now? CursorLock will close and the installer will open."
+        : $"Hay una versión nueva de CursorLock: {available} (tienes la {current}).\n\n¿Descargarla e instalarla ahora? CursorLock se cerrará y se abrirá el instalador.";
+
+    public static string UpdateAvailablePortable(string available, string current) => s_isEnglish
+        ? $"A new version of CursorLock is available: {available} (you have {current}).\n\nYou are using the portable version. Open the download page?"
+        : $"Hay una versión nueva de CursorLock: {available} (tienes la {current}).\n\nEstás usando la versión portable. ¿Abrir la página de descarga?";
+
+    public static string UpdateDownloadFailed => Pick(
+        "No se pudo descargar la actualización. Inténtalo de nuevo más tarde.",
+        "Could not download the update. Please try again later.");
+
+    public static string UpdateIntegrityFailed => Pick(
+        "La descarga no coincide con su suma SHA-256 publicada, así que no se ha instalado. Inténtalo de nuevo más tarde.",
+        "The download does not match its published SHA-256 checksum, so it was not installed. Please try again later.");
+
+    public static string UpdateLaunchFailed => Pick(
+        "No se pudo abrir el instalador descargado.",
+        "Could not open the downloaded installer.");
 
     // Closing the settings window with the X button
     public static string CloseInstruction => Pick("¿Qué quieres hacer?", "What do you want to do?");

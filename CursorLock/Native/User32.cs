@@ -209,6 +209,8 @@ internal static unsafe partial class User32
     // Message boxes and beeps
     public const uint MB_OK = 0x00000000;
     public const uint MB_YESNOCANCEL = 0x00000003;
+    public const uint MB_YESNO = 0x00000004;
+    public const uint MB_ICONINFORMATION = 0x00000040;
     public const uint MB_ICONQUESTION = 0x00000020;
     public const uint MB_ICONWARNING = 0x00000030;
     public const uint MB_ICONASTERISK = 0x00000040;
@@ -225,6 +227,7 @@ internal static unsafe partial class User32
     public const uint SPI_GETNONCLIENTMETRICS = 0x0029;
     public const int COLOR_BTNFACE = 15;
     public const nint IDC_ARROW = 32512;
+    public const nint IDC_WAIT = 32514;
     public const uint LWA_ALPHA = 0x2;
     public const nint HTTRANSPARENT = -1;
     public const nint MA_NOACTIVATE = 3;
@@ -402,6 +405,17 @@ internal static unsafe partial class User32
 
     [LibraryImport(Lib)]
     public static partial nint LoadCursorW(nint instance, nint name);
+
+    [LibraryImport(Lib)]
+    public static partial nint SetCursor(nint cursor);
+
+    [LibraryImport(Lib)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool EnableWindow(nint hwnd, [MarshalAs(UnmanagedType.Bool)] bool enable);
+
+    [LibraryImport(Lib, StringMarshalling = StringMarshalling.Utf16)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool SetWindowTextW(nint hwnd, string text);
 
     // Painting
     [LibraryImport(Lib)]

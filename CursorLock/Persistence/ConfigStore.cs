@@ -19,17 +19,6 @@ internal static class ConfigStore
     const string OsdValue = "Osd";
     const string LanguageValue = "Language";
 
-    /// <summary>
-    /// False until the settings are saved for the first time. All values are written together,
-    /// so the hotkey value tells whether they ever were. (The key alone is not enough: the MSI
-    /// creates its own Install subkey under it.)
-    /// </summary>
-    public static bool HasSavedSettings()
-    {
-        using RegistryKeyHandle key = RegistryKeyHandle.OpenForRead(KeyPath);
-        return key.TryGetDword(HotkeyVirtualKeyValue, out _);
-    }
-
     public static Config Load()
     {
         Config config = Config.Default;

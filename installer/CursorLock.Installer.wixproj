@@ -1,7 +1,7 @@
 <Project Sdk="WixToolset.Sdk/5.0.2">
 
   <!--
-    Per-user MSI for CursorLock. Build the app first (see build.ps1), then:
+    Per-user MSI for CursorLock, one per culture. Build the app first (see build.ps1), then:
       dotnet build installer/CursorLock.Installer.wixproj -c Release -p:ProductVersion=1.2.3
   -->
   <PropertyGroup>
@@ -9,10 +9,18 @@
     <SourceExe Condition="'$(SourceExe)' == ''">$(MSBuildThisFileDirectory)..\artifacts\publish\CursorLock.exe</SourceExe>
     <OutputName>CursorLock-$(ProductVersion)</OutputName>
     <InstallerPlatform>x64</InstallerPlatform>
+    <Cultures>en-US;es-ES</Cultures>
     <DefineConstants>ProductVersion=$(ProductVersion);SourceExe=$(SourceExe)</DefineConstants>
     <SuppressPdbOutput>true</SuppressPdbOutput>
-    <!-- ICE91 warns that per-user folders do not follow ALLUSERS. This package is per-user only, by design. -->
-    <SuppressIces>ICE91</SuppressIces>
+    <!--
+      ICE61: same-version upgrades are allowed on purpose, so reinstalling replaces the copy.
+      ICE91: per-user folders do not follow ALLUSERS; this package is per-user only, by design.
+    -->
+    <SuppressIces>ICE61;ICE91</SuppressIces>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+  </ItemGroup>
 
 </Project>

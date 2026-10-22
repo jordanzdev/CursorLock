@@ -19,12 +19,15 @@ internal static unsafe class App
 {
     static bool s_isShutDown;
 
-    public static int Run()
+    /// <param name="showSettings">
+    /// True when the user opened the app (Start menu, exe, end of installation), so it becomes
+    /// visible; false when Windows started it at sign-in, so it stays quietly in the tray.
+    /// </param>
+    public static int Run(bool showSettings)
     {
-        bool isFirstRun = !ConfigStore.HasSavedSettings();
         Config.Current = ConfigStore.Load();
         Strings.Apply(Config.Current.Language);
-        StartupRegistration.RepairPath();
+        StartupRegistration.RepairCommand();
 
         if (!MainWindow.Create())
             return 1;
@@ -38,8 +41,8 @@ internal static unsafe class App
         if (!GlobalHotkey.Register())
             TrayIcon.ShowWarning(Strings.HotkeyUnavailableTitle, Strings.HotkeyUnavailableText(HotkeyText.Format(Config.Current.Hotkey)));
 
-        if (isFirstRun)
-            Welcome();
+        if (showSettings)
+            SettingsWindow.Show();
 
         RunMessageLoop();
         Shutdown();
@@ -105,16 +108,6 @@ internal static unsafe class App
         OsdWindow.Destroy();
         TrayIcon.Remove();
         StatusIcons.Destroy();
-    }
-
-    /// <summary>
-    /// First run: show the settings instead of starting silently in the tray, so the user sees
-    /// the app and its hotkey. The defaults are saved right away, so this happens only once.
-    /// </summary>
-    static void Welcome()
-    {
-        ConfigStore.Save(Config.Current);
-        SettingsWindow.Show();
     }
 
     static void Execute(TrayCommand command)

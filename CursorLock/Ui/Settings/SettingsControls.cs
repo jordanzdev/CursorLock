@@ -6,7 +6,7 @@ namespace CursorLock.Ui.Settings;
 /// <summary>Child controls of the settings window: ids, creation, DPI-aware layout and small accessors.</summary>
 internal static unsafe class SettingsControls
 {
-    public const int ClientWidth = 344;
+    public const int ClientWidth = 372;
     public const int ClientHeight = 264;
 
     public const int HotkeyId = 100;
@@ -16,6 +16,7 @@ internal static unsafe class SettingsControls
     public const int SoundId = 104;
     public const int OsdId = 105;
     public const int LanguageId = 106;
+    public const int CheckForUpdatesId = 107;
     public const int SaveId = IDOK;
     public const int CancelId = IDCANCEL;
 
@@ -32,19 +33,20 @@ internal static unsafe class SettingsControls
     static ReadOnlySpan<short> Layout =>
     [
         HotkeyLabelId, 12, 15, 124, 20,
-        HotkeyId, 140, 12, 192, 23,
+        HotkeyId, 140, 12, 220, 23,
         MonitorLabelId, 12, 47, 124, 20,
-        MonitorId, 140, 44, 192, 200,
+        MonitorId, 140, 44, 220, 200,
         ReapplyIntervalLabelId, 12, 79, 124, 20,
         ReapplyIntervalId, 140, 76, 64, 23,
-        ReapplyRangeLabelId, 210, 79, 122, 20,
+        ReapplyRangeLabelId, 210, 79, 150, 20,
         LanguageLabelId, 12, 111, 124, 20,
-        LanguageId, 140, 108, 192, 200,
-        StartWithWindowsId, 12, 144, 320, 20,
-        SoundId, 12, 168, 320, 20,
-        OsdId, 12, 192, 320, 20,
-        SaveId, 164, 226, 80, 26,
-        CancelId, 252, 226, 80, 26,
+        LanguageId, 140, 108, 220, 200,
+        StartWithWindowsId, 12, 144, 348, 20,
+        SoundId, 12, 168, 348, 20,
+        OsdId, 12, 192, 348, 20,
+        CheckForUpdatesId, 12, 226, 160, 26,
+        SaveId, 192, 226, 80, 26,
+        CancelId, 280, 226, 80, 26,
     ];
 
     /// <summary>Creates every control. Creation order is the Tab order.</summary>
@@ -62,6 +64,7 @@ internal static unsafe class SettingsControls
         CreateCheckBox(window, StartWithWindowsId, Strings.CheckStartWithWindows);
         CreateCheckBox(window, SoundId, Strings.CheckSound);
         CreateCheckBox(window, OsdId, Strings.CheckOsd);
+        CreateChild(window, CheckForUpdatesId, "BUTTON", Strings.ButtonCheckForUpdates, WS_TABSTOP | BS_PUSHBUTTON, 0);
         CreateChild(window, SaveId, "BUTTON", Strings.ButtonSave, WS_TABSTOP | BS_DEFPUSHBUTTON, 0);
         CreateChild(window, CancelId, "BUTTON", Strings.ButtonCancel, WS_TABSTOP | BS_PUSHBUTTON, 0);
 
