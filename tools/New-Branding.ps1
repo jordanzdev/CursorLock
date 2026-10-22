@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Generates the CursorLock branding in assets\: CursorLock.ico (16–256 px), logo.svg and the
-    installer bitmaps (installer-banner.bmp, installer-dialog.bmp).
+    installer bitmaps (installer-banner.bmp, installer-side.bmp).
 
 .DESCRIPTION
     The logo is a white mouse cursor inside red corner brackets (a confined cursor) on a dark
@@ -176,10 +176,11 @@ function Write-InstallerBanner([string] $path) {
     Save-Bmp $bitmap $g $path
 }
 
-# Side panel of the final page: dark strip with the logo and the name; the text area stays white.
-function Write-InstallerDialog([string] $path) {
+# Side strip of the language and final pages (123 x 234 dialog units): logo and name on dark.
+# Only the strip is an image, so the controls next to it sit on the normal dialog background.
+function Write-InstallerSide([string] $path) {
     $panelWidth = 164
-    $bitmap, $g = New-InstallerCanvas 493 312
+    $bitmap, $g = New-InstallerCanvas $panelWidth 312
     $panel = New-Object Drawing.Drawing2D.LinearGradientBrush (New-Object Drawing.PointF 0, 0), (New-Object Drawing.PointF 0, 312),
         ([Drawing.ColorTranslator]::FromHtml($colors.BackgroundTop)), ([Drawing.ColorTranslator]::FromHtml($colors.BackgroundBottom))
     $g.FillRectangle($panel, 0, 0, $panelWidth, 312)
@@ -199,5 +200,5 @@ function Write-InstallerDialog([string] $path) {
 Write-Ico (Join-Path $assets 'CursorLock.ico') $sizes
 Write-Svg (Join-Path $assets 'logo.svg')
 Write-InstallerBanner (Join-Path $assets 'installer-banner.bmp')
-Write-InstallerDialog (Join-Path $assets 'installer-dialog.bmp')
-Write-Host "Written to ${assets}: CursorLock.ico ($($sizes -join ', ') px), logo.svg, installer-banner.bmp, installer-dialog.bmp"
+Write-InstallerSide (Join-Path $assets 'installer-side.bmp')
+Write-Host "Written to ${assets}: CursorLock.ico ($($sizes -join ', ') px), logo.svg, installer-banner.bmp, installer-side.bmp"

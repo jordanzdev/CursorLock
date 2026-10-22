@@ -81,8 +81,6 @@ internal static class Strings
         "The settings were applied, but could not be saved to the registry.");
 
     // Updates
-    /// <summary>Culture of the MSI to download, matching the UI language.</summary>
-    public static string InstallerCulture => s_isEnglish ? "en-US" : "es-ES";
     public static string ButtonCheckForUpdates => Pick("Buscar actualizaciones", "Check for updates");
     public static string CheckingForUpdates => Pick("Comprobando…", "Checking…");
     public static string DownloadingUpdate => Pick("Descargando…", "Downloading…");

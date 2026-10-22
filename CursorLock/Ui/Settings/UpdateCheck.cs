@@ -43,7 +43,7 @@ internal static class UpdateCheck
             return;
 
         reportProgress(Strings.DownloadingUpdate);
-        switch (UpdateDownloader.TryDownloadInstaller(latest, Strings.InstallerCulture, out string installerPath))
+        switch (UpdateDownloader.TryDownloadInstaller(latest, out string installerPath))
         {
             case DownloadResult.NetworkError:
                 Show(owner, Strings.UpdateDownloadFailed, MB_ICONWARNING);

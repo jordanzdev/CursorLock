@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<WixLocalization Culture="en-US" Codepage="1252" xmlns="http://wixtoolset.org/schemas/v4/wxl">
-  <String Id="ProductLanguage" Value="1033" />
-  <String Id="OpenApp" Value="Open CursorLock" />
-  <String Id="DowngradeError" Value="A newer version of CursorLock is already installed." />
-</WixLocalization>

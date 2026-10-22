@@ -22,7 +22,7 @@ Download the latest version from **[Releases](../../releases)**:
 
 | File | Purpose |
 |---|---|
-| `CursorLock-x.y.z-en-US.msi`<br>`CursorLock-x.y.z-es-ES.msi` | **Per-user** Windows Installer package, in English or Spanish: no administrator rights needed. Installs to `%LOCALAPPDATA%\Programs\CursorLock` and adds a Start menu shortcut; the last page offers to open CursorLock. Uninstall it from *Settings → Apps*. |
+| `CursorLock-x.y.z.msi` | **Per-user** Windows Installer package: no administrator rights needed. Its first page lets you choose English or Español (for the installer and for CursorLock); it installs to `%LOCALAPPDATA%\Programs\CursorLock`, adds a Start menu shortcut and its last page offers to open CursorLock. Uninstall it from *Settings → Apps*. |
 | `CursorLock-x.y.z-portable.exe` | The same executable without installing: copy it anywhere and run it. |
 | `SHA256SUMS.txt` | Hashes to verify the downloads: `Get-FileHash <file>` in PowerShell, or `sha256sum -c SHA256SUMS.txt`. |
 
@@ -74,9 +74,10 @@ Changes apply on save, without restarting. The window title shows the installed 
 ### Updates
 
 **Check for updates** (in Settings) looks up the latest release on GitHub. If there is a
-newer one, it asks first, then downloads the MSI in your language, verifies it against the
-release's `SHA256SUMS.txt` and starts it; the installer replaces the app, keeps your settings
-and offers to open CursorLock at the end. With the portable exe it opens the download page
+newer one, it asks first, then downloads the MSI, verifies it against the release's
+`SHA256SUMS.txt` and starts it; the installer preselects your current language, replaces the
+app, keeps your settings and offers to open CursorLock at the end. Every release's changes
+are listed in [CHANGELOG.md](CHANGELOG.md) and in its release notes. With the portable exe it opens the download page
 instead. The app never checks for updates on its own.
 
 ## Why it adds no latency
@@ -177,8 +178,7 @@ downloaded automatically at build time, nothing else to install.
 Output in `artifacts\`:
 
 ```
-CursorLock-1.2.3-en-US.msi
-CursorLock-1.2.3-es-ES.msi
+CursorLock-1.2.3.msi
 CursorLock-1.2.3-portable.exe
 SHA256SUMS.txt
 ```
@@ -197,13 +197,19 @@ dotnet publish CursorLock\CursorLock.csproj -c Release
 
 ### Publishing a release
 
-```powershell
-git tag v1.2.3
-git push origin v1.2.3
-```
+1. In [CHANGELOG.md](CHANGELOG.md), move the `[Unreleased]` entries to a new
+   `## [1.2.3] - YYYY-MM-DD` section (and update the links at the bottom). Commit and push.
+2. Tag and push:
+
+   ```powershell
+   git tag -a v1.2.3 -m "CursorLock 1.2.3"
+   git push origin v1.2.3
+   ```
 
 The [`release.yml`](.github/workflows/release.yml) workflow builds the exe and the MSI on
-`windows-latest` and creates the GitHub Release with these files.
+`windows-latest` and creates the GitHub Release with these files. Its notes are the
+version's changelog section plus a downloads table (`tools/Get-ReleaseNotes.ps1`); if the
+section is missing, the release fails before building anything.
 
 ## Registry
 
@@ -232,9 +238,12 @@ registry part (it is what the MSI runs on uninstall).
 ```
 build.ps1                    exe + MSI + hashes into artifacts\
 .github/workflows/           automatic release when a v* tag is pushed
-installer/                   per-user MSI (WiX 5)
+CHANGELOG.md                 changes per version (also used as release notes)
+installer/                   per-user MSI (WiX 5): Package.wxs (what is installed),
+                             Dialogs.wxs (pages, language choice), Texts.wxs (English/Spanish texts)
 assets/                      logo (CursorLock.ico, logo.svg) and installer bitmaps
 tools/New-Branding.ps1       regenerates every file in assets/ from the same geometry
+tools/Get-ReleaseNotes.ps1   release notes of a version from CHANGELOG.md
 CursorLock/
   CursorLock.csproj          NativeAOT, no NuGet packages
   app.manifest               Common Controls v6, PerMonitorV2, asInvoker

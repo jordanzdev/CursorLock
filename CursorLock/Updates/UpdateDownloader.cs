@@ -12,17 +12,18 @@ internal enum DownloadResult
 
 /// <summary>
 /// Downloads the MSI of a release and checks it against the release's SHA256SUMS.txt before it
-/// is ever run. The file is saved under %TEMP%\CursorLock-update.
+/// is ever run. The file is saved under %TEMP%\CursorLock-update. The installer itself asks for
+/// the language, preselecting the one CursorLock uses.
 /// </summary>
 internal static unsafe class UpdateDownloader
 {
     const string ChecksumsFileName = "SHA256SUMS.txt";
     const string DownloadFolderName = "CursorLock-update";
 
-    public static DownloadResult TryDownloadInstaller(Version version, string culture, out string installerPath)
+    public static DownloadResult TryDownloadInstaller(Version version, out string installerPath)
     {
         installerPath = "";
-        string fileName = GitHubReleases.InstallerFileName(version, culture);
+        string fileName = GitHubReleases.InstallerFileName(version);
 
         if (!GitHubReleases.TryDownloadAsset(version, ChecksumsFileName, out byte[] checksums) ||
             !GitHubReleases.TryDownloadAsset(version, fileName, out byte[] installer))

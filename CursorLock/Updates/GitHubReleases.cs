@@ -42,6 +42,6 @@ internal static class GitHubReleases
             return sent && response.IsSuccess && response.TryReadBody(MaxDownloadBytes, out content);
     }
 
-    public static string InstallerFileName(Version version, string culture) =>
-        $"CursorLock-{AppVersion.ToText(version)}-{culture}.msi";
+    /// <summary>The single MSI of a release; it lets the user choose the language.</summary>
+    public static string InstallerFileName(Version version) => $"CursorLock-{AppVersion.ToText(version)}.msi";
 }
