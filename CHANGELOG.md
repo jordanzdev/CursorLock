@@ -7,6 +7,8 @@ GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-23
+
 ### Added
 
 - The last page of the installer offers to **create a desktop shortcut** (unchecked by
@@ -61,6 +63,7 @@ First release.
   minimize to the tray or exit.
 - Per-user MSI installer (no administrator rights) and portable exe.
 
-[Unreleased]: https://github.com/jordanzdev/CursorLock/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/jordanzdev/CursorLock/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/jordanzdev/CursorLock/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/jordanzdev/CursorLock/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jordanzdev/CursorLock/releases/tag/v1.0.0
