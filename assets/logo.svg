@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>CursorLock</title>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2B313D" />
+      <stop offset="1" stop-color="#161A21" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="48" fill="url(#background)" />
+  <g fill="none" stroke="#E53935" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="56,96 56,56 96,56" />
+    <polyline points="160,56 200,56 200,96" />
+    <polyline points="200,160 200,200 160,200" />
+    <polyline points="96,200 56,200 56,160" />
+  </g>
+  <polygon points="98,80 98,175 120.8,152.2 136,186.4 151.2,178.8 136,146.5 166.4,146.5" fill="#FFFFFF" stroke="#161A21" stroke-width="12" stroke-linejoin="round" paint-order="stroke" />
+</svg>
