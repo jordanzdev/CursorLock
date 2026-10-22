@@ -39,10 +39,11 @@ Invoke-Checked {
 
 Copy-Item $exe (Join-Path $artifacts "CursorLock-$Version-portable.exe") -Force
 
-Get-ChildItem $artifacts -Filter "CursorLock-$Version*" -File |
+# "hash  name" lines with LF endings, so `sha256sum -c SHA256SUMS.txt` works on any platform.
+$checksums = Get-ChildItem $artifacts -Filter "CursorLock-$Version*" -File |
     Get-FileHash -Algorithm SHA256 |
-    ForEach-Object { "$($_.Hash.ToLowerInvariant())  $(Split-Path $_.Path -Leaf)" } |
-    Set-Content (Join-Path $artifacts 'SHA256SUMS.txt') -Encoding ascii
+    ForEach-Object { "$($_.Hash.ToLowerInvariant())  $(Split-Path $_.Path -Leaf)" }
+[IO.File]::WriteAllText((Join-Path $artifacts 'SHA256SUMS.txt'), (($checksums -join "`n") + "`n"))
 
 Write-Host "Done:"
 Get-ChildItem $artifacts -File | ForEach-Object { "  $($_.Name)" }

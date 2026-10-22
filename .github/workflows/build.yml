@@ -1,0 +1,45 @@
+name: Build
+
+# Checks every pull request and every push to main: the exe and the MSI must build without
+# errors and the code must not use any API that CursorLock promises never to use.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Check forbidden APIs
+        shell: pwsh
+        run: |
+          $pattern = 'SetWindowsHookEx|GetAsyncKeyState|GetKeyState|SendInput|keybd_event|mouse_event|RegisterRawInputDevices|GetRawInputData|OpenProcess|ReadProcessMemory|WriteProcessMemory|CreateRemoteThread|SetWinEventHook'
+          $hits = Get-ChildItem CursorLock, installer -Recurse -File -Include *.cs, *.csproj, *.manifest, *.wxs |
+              Select-String -Pattern $pattern
+          if ($hits) {
+              $hits | ForEach-Object { Write-Host "::error file=$($_.Path),line=$($_.LineNumber)::Forbidden API: $($_.Matches[0].Value)" }
+              exit 1
+          }
+          Write-Host 'No forbidden APIs found.'
+
+      - name: Build exe and MSI
+        shell: pwsh
+        run: ./build.ps1 -Version 0.0.0
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: CursorLock-build-${{ github.sha }}
+          path: |
+            artifacts/*.msi
+            artifacts/*-portable.exe
+          retention-days: 14

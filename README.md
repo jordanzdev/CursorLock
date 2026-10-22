@@ -24,7 +24,7 @@ Download the latest version from **[Releases](../../releases)**:
 |---|---|
 | `CursorLock-x.y.z.msi` | **Per-user** Windows Installer package: no administrator rights needed. Installs to `%LOCALAPPDATA%\Programs\CursorLock`, adds a Start menu shortcut and starts the app when done. Uninstall it from *Settings → Apps*. |
 | `CursorLock-x.y.z-portable.exe` | The same executable without installing: copy it anywhere and run it. |
-| `SHA256SUMS.txt` | Hashes to verify the downloads (`Get-FileHash <file>` in PowerShell). |
+| `SHA256SUMS.txt` | Hashes to verify the downloads: `Get-FileHash <file>` in PowerShell, or `sha256sum -c SHA256SUMS.txt`. |
 
 The binaries are not code-signed, so Windows SmartScreen may warn you the first time
 (*More info → Run anyway*). They are built by GitHub Actions from this source code
@@ -243,6 +243,10 @@ CursorLock/
     Settings/                SettingsWindow, SettingsControls, SettingsForm, CloseConfirmation
   Native/                    P/Invoke with [LibraryImport], no logic
 ```
+
+## Contributing
+
+Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
